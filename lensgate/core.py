@@ -77,7 +77,7 @@ class RadialSymmetryLens(metaclass=CustomMeta):
         rhom_ = rhom_.to_value(u.solMass / u.pc ** 3)
         return rhom_
 
-    def density2D(self, rz, rp, *args):
+    def density2d(self, rz, rp, *args):
         """Decompose the density method variable 'r' in two components:
         rz as the distance in the line of sight direction and rp as the
         distance in the plane of the sky."""
@@ -100,7 +100,7 @@ class RadialSymmetryLens(metaclass=CustomMeta):
         if isinstance(rp, np.ndarray):
             sigma_singularity = [
                 quad(
-                    self.density2D,
+                    self.density2d,
                     -r_sing,
                     r_sing,
                     args=(rpi, *args),
@@ -112,7 +112,7 @@ class RadialSymmetryLens(metaclass=CustomMeta):
             ]
             sigma_outside = [
                 quad(
-                    self.density2D,
+                    self.density2d,
                     r_sing,
                     self._rz_lim(rp),
                     args=(rpi, *args),
@@ -125,7 +125,7 @@ class RadialSymmetryLens(metaclass=CustomMeta):
         elif isinstance(rp, SCALAR_TYPES):
             sigma_singularity = [
                 quad(
-                    self.density2D,
+                    self.density2d,
                     -r_sing,
                     r_sing,
                     args=(rp, *args),
@@ -136,7 +136,7 @@ class RadialSymmetryLens(metaclass=CustomMeta):
             ]
             sigma_outside = [
                 quad(
-                    self.density2D,
+                    self.density2d,
                     r_sing,
                     self._rz_lim(rp),
                     args=(rp, *args),
