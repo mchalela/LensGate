@@ -1,12 +1,12 @@
-import numpy as np
-from astropy.cosmology import FLRW
-import astropy.units as u
-
-from scipy.integrate import quad
-
+from abc import ABCMeta, abstractmethod
 from functools import cached_property
 
-from abc import ABCMeta, abstractmethod
+import astropy.units as u
+from astropy.cosmology import FLRW
+
+import numpy as np
+
+from scipy.integrate import quad
 
 # ============================================================================
 # CONSTANTS
@@ -24,8 +24,8 @@ DEFAULT_RZ_LIM = 1e9  # in pc
 class CustomMeta(ABCMeta):
     required_attributes = []
 
-    def __call__(self, *args, **kwargs):
-        obj = super(CustomMeta, self).__call__(*args, **kwargs)
+    def __call__(cls, *args, **kwargs):
+        obj = super(CustomMeta, cls).__call__(*args, **kwargs)
         for attr_name in obj.required_attributes:
             if not hasattr(obj, attr_name):
                 raise AttributeError(
@@ -157,10 +157,9 @@ class RadialSymmetryLens(metaclass=CustomMeta):
 
     def inner_mean_sigma(self, rp, *args):
         """Mean projected density within a circle of radius rp."""
-        integrand = lambda r: r * self.radial_mean_sigma(r, *args)
+        ig = lambda r: r * self.radial_mean_sigma(r, *args)
         ims = [
-            quad(integrand, 0.0, rpi, limit=200, epsabs=1e-4)[0]
-            / (0.5 * rpi ** 2)
+            quad(ig, 0.0, rpi, limit=200, epsabs=1e-4)[0] / (0.5 * rpi ** 2)
             for rpi in rp
         ]
         return np.array(ims)
@@ -168,7 +167,7 @@ class RadialSymmetryLens(metaclass=CustomMeta):
     def delta_sigma(self, rp, *args):
         """Projected density contrast computed as:
         inner_mean_sigma - radial_mean_sigma"""
-        deltaSigma = self.inner_mean_sigma(rp, *args) - self.radial_mean_sigma(
+        delta_sigma_ = self.inner_mean_sigma(
             rp, *args
-        )
-        return deltaSigma
+        ) - self.radial_mean_sigma(rp, *args)
+        return delta_sigma_
