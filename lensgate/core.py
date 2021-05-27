@@ -1,13 +1,8 @@
 import numpy as np
-from astropy.cosmology import Planck18, FlatLambdaCDM
+from astropy.cosmology import FLRW
 import astropy.units as u
-import astropy.constants as const
 
-import matplotlib.pyplot as plt
-
-from scipy import special
-from scipy.integrate import quad, simps
-from scipy.interpolate import CubicSpline
+from scipy.integrate import quad
 
 from functools import cached_property
 
@@ -18,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 # ============================================================================
 
 SCALAR_TYPES = (int, float, np.integer, np.floating)
-DEFAULT_RZ_LIM = 1e8  # in pc
+DEFAULT_RZ_LIM = 1e9  # in pc
 
 
 # ============================================================================
@@ -32,8 +27,14 @@ class CustomMeta(ABCMeta):
     def __call__(self, *args, **kwargs):
         obj = super(CustomMeta, self).__call__(*args, **kwargs)
         for attr_name in obj.required_attributes:
-            if not getattr(obj, attr_name):
-                raise ValueError("required attribute (%s) not set" % attr_name)
+            if not hasattr(obj, attr_name):
+                raise AttributeError(
+                    f"Required attribute `{attr_name}` not set."
+                )
+
+        # this should not be validated here, but where?
+        if not isinstance(obj.cosmo, FLRW):
+            raise TypeError(f"Cosmology `{obj.cosmo}` not allowed.")
         return obj
 
 
@@ -42,7 +43,15 @@ class CustomMeta(ABCMeta):
 # ============================================================================
 
 
-class AxialSimetryLens(metaclass=CustomMeta):
+class RadialSymmetryLens(metaclass=CustomMeta):
+    """
+    Provide methods with the lensing integrals optimized for lens systems
+    with radial symmetry.
+
+    The user needs to define the __init__ method with the obligatory
+    parameters z (redshift) and cosmo (cosmology), and the density
+    method.
+    """
 
     required_attributes = ["z", "cosmo"]
 
@@ -69,6 +78,9 @@ class AxialSimetryLens(metaclass=CustomMeta):
         return rhom_
 
     def density2D(self, rz, rp, *args):
+        """Decompose the density method variable 'r' in two components:
+        rz as the distance in the line of sight direction and rp as the
+        distance in the plane of the sky."""
         r = np.sqrt(rp ** 2 + rz ** 2)
         return self.density(r, *args)
 
@@ -83,7 +95,7 @@ class AxialSimetryLens(metaclass=CustomMeta):
         return rz
 
     def sigma(self, rp, *args):
-        """Projected mass density along the line of sight of RhoLW12."""
+        """Projected mass density along the line of sight."""
         r_sing = 1e2  # in pc
         if isinstance(rp, np.ndarray):
             sigma_singularity = [
@@ -136,9 +148,15 @@ class AxialSimetryLens(metaclass=CustomMeta):
         return np.array(sigma_)
 
     def radial_mean_sigma(self, rp, *args):
+        """Mean projected density averaged at every point of radius rp.
+
+        Note: Here the density method is assumed to be centered at the point
+        of simmetry, so no actual integral over the 2*pi is computed as it is
+        assumed constant."""
         return self.sigma(rp, *args)
 
     def inner_mean_sigma(self, rp, *args):
+        """Mean projected density within a circle of radius rp."""
         integrand = lambda r: r * self.radial_mean_sigma(r, *args)
         ims = [
             quad(integrand, 0.0, rpi, limit=200, epsabs=1e-4)[0]
@@ -148,6 +166,8 @@ class AxialSimetryLens(metaclass=CustomMeta):
         return np.array(ims)
 
     def delta_sigma(self, rp, *args):
+        """Projected density contrast computed as:
+        inner_mean_sigma - radial_mean_sigma"""
         deltaSigma = self.inner_mean_sigma(rp, *args) - self.radial_mean_sigma(
             rp, *args
         )

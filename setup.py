@@ -12,7 +12,7 @@
 # DOCS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-"""SnakeJazz installation file.
+"""LensGate installation file.
 """
 
 
@@ -34,21 +34,21 @@ from setuptools import setup
 # CONSTANTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-REQUIREMENTS = ["pygame", "youtube_dl", "validator_collection"]
+REQUIREMENTS = ["numpy", "astropy", "scipy"]
 
 PATH = pathlib.Path(os.path.abspath(os.path.dirname(__file__)))
 
 with open(PATH / "README.md") as fp:
     LONG_DESCRIPTION = fp.read()
 
-with open(PATH / "snakejazz" / "__init__.py") as fp:
+with open(PATH / "lensgate" / "__init__.py") as fp:
     for line in fp.readlines():
         if line.startswith("__version__ = "):
             VERSION = line.split("=", 1)[-1].replace('"', "").strip()
             break
 
 
-DESCRIPTION = "Decorators for sound reproduction."
+DESCRIPTION = "..."
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,16 +58,16 @@ DESCRIPTION = "Decorators for sound reproduction."
 
 def do_setup():
     setup(
-        name="snakejazz",
+        name="lensgate",
         version=VERSION,
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
         long_description_content_type="text/markdown",
         author="Martin Chalela",
-        author_email="tinchochalela@gmail.com",
-        url="https://github.com/mchalela/SnakeJazz",
+        author_email="mchalela@unc.edu.ar",
+        url="https://github.com/mchalela/LensGate",
         license="MIT",
-        keywords=["snakejazz", "snake", "jazz", "decorator", "sound", "music"],
+        keywords=["weak", "gravitational", "lensing"],
         classifiers=[
             "Development Status :: 4 - Beta",
             "Intended Audience :: Education",
@@ -77,16 +77,9 @@ def do_setup():
             "Programming Language :: Python",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: Implementation :: CPython",
-            "Topic :: Games/Entertainment",
-            "Topic :: Multimedia :: Sound/Audio",
-            "Topic :: Multimedia :: Video",
+            "Topic :: Scientific/Engineering",
         ],
-        packages=[
-            "snakejazz",
-            "snakejazz.sounds",
-            "snakejazz.sounds.rhodesmas",
-        ],
-        include_package_data=True,
+        packages=["lensgate"],
         py_modules=["ez_setup"],
         install_requires=REQUIREMENTS,
     )

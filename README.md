@@ -1,6 +1,6 @@
 <!-- DESCRIPTION -->
 ## LensGate
-A Python code for the weak lensing community that predicts the lensing signal of a given density distribution.
+A Python package that predicts the weak lensing signal of a mass density distribution.
 
 
 <!-- LICENSE -->
